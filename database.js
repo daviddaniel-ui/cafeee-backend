@@ -1,13 +1,11 @@
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 
-const pool = mysql.createPool({
-  host: 'localhost',
+const connection = mysql.createConnection({
+  host: 'yamabiko.proxy.rlwy.net',
   user: 'root',
-  password: '',
-  database: 'cafeee',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  password: 'MzElXIBeDgBaCExawqzjGfQDSZsJNhWS',
+  database: 'railway',
+  port: 23584
 });
 
-module.exports = pool; 
+module.exports = connection; 

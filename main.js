@@ -4,7 +4,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const api = require('./server');
-const db = require('./database.js');
 
 let mainWindow;
 
@@ -24,12 +23,8 @@ app.whenReady().then(() => {
   createWindow();
 
   // Iniciar el servidor Express en un puerto local
-  api.listen(3001, (err) => {
-    if (err) {
-      console.error('Error al iniciar la API:', err);
-    } else {
-      console.log('API escuchando en http://localhost:3001');
-    }
+  api.listen(3001, () => {
+    console.log('API escuchando en http://localhost:3001');
   });
 
   app.on('activate', function () {
