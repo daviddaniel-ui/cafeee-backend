@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafetería - Login</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 248, 240, 0.92);
+      z-index: 0;
+    }
+    .main-content {
+      position: relative;
+      z-index: 1;
+    }
+    .logo-cafe {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+    }
+    .logo-cafe img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      box-shadow: 0 2px 12px rgba(121,85,72,0.18);
+      border: 4px solid #fff3e0;
+      background: #fff3e0;
+      object-fit: cover;
+    }
+    .login-container, #app {
+      background: rgba(255, 255, 255, 0.98);
+      padding: 2.5rem 2rem 2rem 2rem;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(121,85,72,0.18), 0 1.5px 4px rgba(121,85,72,0.10);
+      max-width: 420px;
+      margin: 2.5rem auto;
+      position: relative;
+    }
+    h2, h3 {
+      text-align: center;
+      color: #6d4c41;
+      margin-bottom: 1.5rem;
+      font-family: 'Merriweather', serif;
+      letter-spacing: 1px;
+    }
+    nav {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    nav button {
+      background: #a1887f;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 1px 4px rgba(121,85,72,0.10);
+    }
+    nav button:hover {
+      background: #6d4c41;
+    }
+    nav button[style*="background:#b71c1c"] {
+      background: #b71c1c !important;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-bottom: 1.2rem;
+    }
+    input {
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: 1.5px solid #bcaea7;
+      font-size: 1rem;
+      background: #fbeee6;
+      transition: border 0.2s;
+    }
+    input:focus {
+      border: 2px solid #a1887f;
+      outline: none;
+    }
+    button[type="submit"] {
+      background: #795548;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem 0;
+      font-size: 1.05rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+      box-shadow: 0 1px 4px rgba(121,85,72,0.10);
+    }
+    button[type="submit"]:hover {
+      background: #5d4037;
+    }
+    .error {
+      color: #b71c1c;
+      text-align: center;
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    ul li {
+      background: #fbeee6 url('https://cdn-icons-png.flaticon.com/512/415/415733.png') no-repeat 98% center;
+      background-size: 32px 32px;
+      margin-bottom: 0.5rem;
+      padding: 0.8rem 1rem 0.8rem 1rem;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(121,85,72,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 1rem;
+      transition: background 0.2s;
+      min-height: 48px;
+    }
+    ul li[style*='cursor:pointer'] {
+      cursor: pointer;
+      background: #ffe0b2 url('https://cdn-icons-png.flaticon.com/512/415/415733.png') no-repeat 98% center;
+      background-size: 32px 32px;
+    }
+    ul li:hover {
+      background: #ffe0b2 url('https://cdn-icons-png.flaticon.com/512/415/415733.png') no-repeat 98% center;
+      background-size: 32px 32px;
+    }
+    ul li .estado {
+      font-size: 0.95em;
+      font-weight: 500;
+      margin-left: 0.5em;
+      padding: 0.2em 0.7em;
+      border-radius: 12px;
+      background: #d7ccc8;
+      color: #6d4c41;
+    }
+    ul li .estado.inactivo {
+      background: #ffccbc;
+      color: #b71c1c;
+    }
+    ul li button {
+      background: #bdbdbd;
+      color: #4e342e;
+      border: none;
+      border-radius: 6px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-left: 1rem;
+      transition: background 0.2s;
+    }
+    ul li button:hover {
+      background: #a1887f;
+      color: #fff;
+    }
+    .cafe-img {
+      display: block;
+      margin: 1.5rem auto 0.5rem auto;
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      opacity: 0.8;
+    }
+    .login-container form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    }
+    .login-container input {
+      width: 100%;
+      max-width: 320px;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      border: 1.5px solid #bcaea7;
+      font-size: 1.08rem;
+      background: #fbeee6;
+      transition: border 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 4px rgba(121,85,72,0.07);
+    }
+    .login-container input:focus {
+      border: 2px solid #a1887f;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(121,85,72,0.13);
+    }
+    .btn-ingresar {
+      width: 100%;
+      max-width: 320px;
+      padding: 0.85rem 0;
+      margin-top: 0.2rem;
+      background: linear-gradient(90deg, #a1887f 0%, #795548 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.13rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(121,85,72,0.13);
+      transition: background 0.2s, box-shadow 0.2s;
+      letter-spacing: 1px;
+    }
+    .btn-ingresar:hover, .btn-ingresar:focus {
+      background: linear-gradient(90deg, #795548 0%, #a1887f 100%);
+      box-shadow: 0 4px 16px rgba(121,85,72,0.18);
+    }
+    .login-container .error {
+      margin-top: 0.7rem;
+      margin-bottom: 0;
+    }
+    @media (max-width: 600px) {
+      .login-container, #app {
+        max-width: 98vw;
+        padding: 1rem;
+      }
+      nav {
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <div class="main-content">
+    <div class="logo-cafe">
+      <img src="https://cdn-icons-png.flaticon.com/512/3047/3047926.png" alt="Logo Café" />
+    </div>
+    <div class="login-container">
+      <h2>Iniciar Sesión</h2>
+      <form id="login-form" onsubmit="login(); return false;">
+        <input type="text" id="usuario" placeholder="Usuario" autocomplete="username" />
+        <input type="password" id="contrasena" placeholder="Contraseña" autocomplete="current-password" />
+        <button type="submit" class="btn-ingresar">Ingresar</button>
+        <div id="error" class="error"></div>
+      </form>
+    </div>
+    <div id="app" style="display:none">
+      <nav style="margin-bottom:1rem;">
+        <button id="btn-cajeros" style="display:none" onclick="showView('cajeros')">Gestionar Cajeros</button>
+        <button id="btn-ventas-admin" style="display:none" onclick="showView('ventas-admin')">Ver Ventas</button>
+        <button id="btn-ventas-cajero" style="display:none" onclick="showView('ventas-cajero')">Registrar Venta</button>
+        <button id="btn-productos" style="display:none" onclick="showView('productos')">Productos</button>
+        <button onclick="logout()" style="float:right;background:#b71c1c;">Cerrar sesión</button>
+      </nav>
+      <div id="view-cajeros" style="display:none">
+        <h3>Gestión de Cajeros</h3>
+        <form id="form-cajero" onsubmit="return crearCajero(event)">
+          <input type="text" id="nuevo-usuario" placeholder="Usuario cajero" required />
+          <input type="password" id="nuevo-pass" placeholder="Contraseña" required />
+          <button type="submit">Crear Cajero</button>
+        </form>
+        <ul id="lista-cajeros"></ul>
+      </div>
+      <div id="view-ventas-admin" style="display:none">
+        <h3>Ventas Registradas</h3>
+        <div style="overflow-x:auto;">
+          <table id="tabla-ventas" style="width:100%;border-collapse:collapse;background:#fff;box-shadow:0 2px 8px #bcaea7;border-radius:10px;overflow:hidden;">
+            <thead style="background:#fbeee6;">
+              <tr>
+                <th style="padding:0.7em 0.5em;">Fecha</th>
+                <th style="padding:0.7em 0.5em;">Cajero</th>
+                <th style="padding:0.7em 0.5em;">Total</th>
+                <th style="padding:0.7em 0.5em;">Productos</th>
+                <th style="padding:0.7em 0.5em;">Detalles</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-ventas"></tbody>
+          </table>
+        </div>
+        <div id="modal-detalle-venta" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); align-items:center; justify-content:center; z-index:10;">
+          <div style="background:#fff; padding:2rem; border-radius:12px; min-width:300px; max-width:90vw; margin:auto;">
+            <h4>Detalle de Venta</h4>
+            <div id="detalle-venta-content"></div>
+            <button onclick="cerrarModalDetalleVenta()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+      <div id="view-ventas-cajero" style="display:none">
+        <h3>Registrar Venta</h3>
+        <div id="productos-venta"></div>
+        <div style="margin:1rem 0; font-size:1.2em;">
+          Total: $<span id="total-venta">0.00</span>
+        </div>
+        <button onclick="registrarVentaCarrito()" style="width:100%;max-width:320px;">Registrar Venta</button>
+      </div>
+      <div id="view-productos" style="display:none">
+        <h3>Gestión de Productos</h3>
+        <form id="form-producto" onsubmit="return crearProducto(event)">
+          <input type="text" id="prod-nombre" placeholder="Nombre" required />
+          <input type="number" id="prod-precio" placeholder="Precio" min="0" step="0.01" required />
+          <input type="text" id="prod-categoria" placeholder="Categoría" />
+          <input type="url" id="prod-imagen" placeholder="URL de imagen" />
+          <button type="submit">Crear Producto</button>
+        </form>
+        <ul id="lista-productos"></ul>
+        <div id="editar-producto-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); align-items:center; justify-content:center; z-index:10;">
+          <div style="background:#fff; padding:2rem; border-radius:12px; min-width:300px; max-width:90vw; margin:auto;">
+            <h4>Editar Producto</h4>
+            <form id="form-editar-producto" onsubmit="return guardarEdicionProducto(event)">
+              <input type="hidden" id="edit-prod-id" />
+              <input type="text" id="edit-prod-nombre" placeholder="Nombre" required />
+              <input type="number" id="edit-prod-precio" placeholder="Precio" min="0" step="0.01" required />
+              <input type="text" id="edit-prod-categoria" placeholder="Categoría" />
+              <input type="url" id="edit-prod-imagen" placeholder="URL de imagen" />
+              <label><input type="checkbox" id="edit-prod-activo" /> Activo</label>
+              <button type="submit">Guardar Cambios</button>
+              <button type="button" onclick="cerrarModalEdicion()">Cancelar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <img class="cafe-img" src="https://cdn-icons-png.flaticon.com/512/415/415733.png" alt="Taza de café decorativa" />
+    </div>
+  </div>
+  <script>
+    async function login() {
+      const usuario = document.getElementById('usuario').value;
+      const contrasena = document.getElementById('contrasena').value;
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = '';
+      try {
+        const res = await fetch('http://localhost:3001/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario, contrasena })
+        });
+        const data = await res.json();
+        if (data.error) {
+          errorDiv.textContent = data.error;
+        } else {
+          document.querySelector('.login-container').style.display = 'none';
+          document.getElementById('app').style.display = '';
+          window.token = data.token;
+          window.rol = data.rol;
+          // Mostrar menú según rol
+          if (data.rol === 'admin') {
+            document.getElementById('btn-cajeros').style.display = '';
+            document.getElementById('btn-ventas-admin').style.display = '';
+            document.getElementById('btn-productos').style.display = '';
+            showView('cajeros');
+          } else {
+            document.getElementById('btn-ventas-cajero').style.display = '';
+            showView('ventas-cajero');
+          }
+        }
+      } catch (e) {
+        errorDiv.textContent = 'Error de conexión con el servidor.';
+      }
+    }
+    function showView(view) {
+      document.getElementById('view-cajeros').style.display = 'none';
+      document.getElementById('view-ventas-admin').style.display = 'none';
+      document.getElementById('view-ventas-cajero').style.display = 'none';
+      document.getElementById('view-productos').style.display = 'none';
+      if (view === 'cajeros') cargarCajeros();
+      if (view === 'ventas-admin') cargarVentas();
+      if (view === 'productos') cargarProductos();
+      if (view === 'ventas-cajero') cargarProductosVenta();
+      document.getElementById('view-' + view).style.display = '';
+    }
+    function logout() {
+      window.token = null;
+      window.rol = null;
+      document.getElementById('app').style.display = 'none';
+      document.querySelector('.login-container').style.display = '';
+      document.getElementById('usuario').value = '';
+      document.getElementById('contrasena').value = '';
+      document.getElementById('error').textContent = '';
+      // Ocultar botones
+      document.getElementById('btn-cajeros').style.display = 'none';
+      document.getElementById('btn-ventas-admin').style.display = 'none';
+      document.getElementById('btn-ventas-cajero').style.display = 'none';
+      document.getElementById('btn-productos').style.display = 'none';
+    }
+    async function cargarCajeros() {
+      const ul = document.getElementById('lista-cajeros');
+      ul.innerHTML = '<li>Cargando...</li>';
+      try {
+        const res = await fetch('http://localhost:3001/api/usuarios', {
+          headers: { 'Authorization': 'Bearer ' + window.token }
+        });
+        const data = await res.json();
+        if (data.error) {
+          ul.innerHTML = '<li>' + data.error + '</li>';
+        } else if (data.cajeros.length === 0) {
+          ul.innerHTML = '<li>No hay cajeros registrados.</li>';
+        } else {
+          ul.innerHTML = data.cajeros.map(c => `<li>${c.usuario} (${c.activo ? 'Activo' : 'Inactivo'}) <button onclick="cambiarEstadoCajero(${c.id},${c.activo ? 0 : 1})">${c.activo ? 'Desactivar' : 'Reactivar'}</button></li>`).join('');
+        }
+      } catch (e) {
+        ul.innerHTML = '<li>Error de conexión.</li>';
+      }
+    }
+    async function cambiarEstadoCajero(id, activo) {
+      if (!confirm(activo ? '¿Reactivar cajero?' : '¿Desactivar cajero?')) return;
+      try {
+        const res = await fetch(`http://localhost:3001/api/usuarios/${id}/activo`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.token
+          },
+          body: JSON.stringify({ activo })
+        });
+        const data = await res.json();
+        if (data.error) alert(data.error);
+        cargarCajeros();
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+    }
+    async function crearCajero(e) {
+      e.preventDefault();
+      const usuario = document.getElementById('nuevo-usuario').value;
+      const contrasena = document.getElementById('nuevo-pass').value;
+      const ul = document.getElementById('lista-cajeros');
+      try {
+        const res = await fetch('http://localhost:3001/api/usuarios', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.token
+          },
+          body: JSON.stringify({ usuario, contrasena, rol: 'cajero' })
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+        } else {
+          document.getElementById('nuevo-usuario').value = '';
+          document.getElementById('nuevo-pass').value = '';
+          cargarCajeros();
+        }
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+      return false;
+    }
+    // --- Historial de ventas profesional ---
+    async function cargarVentas() {
+      const tbody = document.getElementById('tbody-ventas');
+      tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+      try {
+        const res = await fetch('http://localhost:3001/api/ventas', {
+          headers: { 'Authorization': 'Bearer ' + window.token }
+        });
+        const data = await res.json();
+        if (data.error) {
+          tbody.innerHTML = `<tr><td colspan='5'>${data.error}</td></tr>`;
+        } else if (data.ventas.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5">No hay ventas registradas.</td></tr>';
+        } else {
+          tbody.innerHTML = '';
+          for (const v of data.ventas) {
+            // Obtener productos resumidos para la fila
+            let productosResumen = '';
+            try {
+              const detalle = await fetch(`http://localhost:3001/api/ventas/${v.id}`, {
+                headers: { 'Authorization': 'Bearer ' + window.token }
+              });
+              const detalleData = await detalle.json();
+              if (detalleData.venta && detalleData.venta.productos) {
+                productosResumen = detalleData.venta.productos.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
+              }
+            } catch {}
+            tbody.innerHTML += `
+              <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:0.6em 0.5em;">${v.fecha.split('T')[0]}</td>
+                <td style="padding:0.6em 0.5em;">${v.usuario}</td>
+                <td style="padding:0.6em 0.5em; color:#795548; font-weight:600;">$${v.total}</td>
+                <td style="padding:0.6em 0.5em;">${productosResumen}</td>
+                <td style="padding:0.6em 0.5em;"><button onclick="verDetalleVentaTabla(${v.id})">Ver Detalles</button></td>
+              </tr>
+            `;
+          }
+        }
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5">Error de conexión.</td></tr>';
+      }
+    }
+    async function verDetalleVentaTabla(id) {
+      try {
+        const res = await fetch(`http://localhost:3001/api/ventas/${id}`, {
+          headers: { 'Authorization': 'Bearer ' + window.token }
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+        } else {
+          const v = data.venta;
+          let html = `<b>Venta #${v.id}</b><br>`;
+          html += `Cajero: <b>${v.usuario}</b><br>`;
+          html += `Fecha: ${v.fecha}<br>`;
+          html += `<table style='width:100%;margin-top:1em;border-collapse:collapse;'>`;
+          html += `<tr style='background:#fbeee6;'><th>Producto</th><th>Cantidad</th><th>Precio Unitario</th><th>Subtotal</th></tr>`;
+          for (const p of v.productos) {
+            html += `<tr><td>${p.nombre}</td><td>${p.cantidad}</td><td>$${p.precio_unitario}</td><td>$${(p.cantidad*p.precio_unitario).toFixed(2)}</td></tr>`;
+          }
+          html += `</table>`;
+          html += `<div style='margin-top:1em;font-size:1.1em;'><b>Total: $${v.total}</b></div>`;
+          document.getElementById('detalle-venta-content').innerHTML = html;
+          document.getElementById('modal-detalle-venta').style.display = 'flex';
+        }
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+    }
+    function cerrarModalDetalleVenta() {
+      document.getElementById('modal-detalle-venta').style.display = 'none';
+    }
+    async function registrarVenta(e) {
+      e.preventDefault();
+      const producto = document.getElementById('producto').value;
+      const cantidad = document.getElementById('cantidad').value;
+      const total = document.getElementById('total').value;
+      try {
+        const res = await fetch('http://localhost:3001/api/ventas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.token
+          },
+          body: JSON.stringify({ producto, cantidad, total })
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+        } else {
+          document.getElementById('producto').value = '';
+          document.getElementById('cantidad').value = '';
+          document.getElementById('total').value = '';
+          alert('Venta registrada');
+          if (window.rol === 'admin') cargarVentas();
+        }
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+      return false;
+    }
+    // --- Productos ---
+    async function cargarProductos() {
+      const ul = document.getElementById('lista-productos');
+      ul.innerHTML = '<li>Cargando...</li>';
+      try {
+        const res = await fetch('http://localhost:3001/api/productos', {
+          headers: { 'Authorization': 'Bearer ' + window.token }
+        });
+        const data = await res.json();
+        if (data.error) {
+          ul.innerHTML = '<li>' + data.error + '</li>';
+        } else if (data.productos.length === 0) {
+          ul.innerHTML = '<li>No hay productos registrados.</li>';
+        } else {
+          ul.innerHTML = data.productos.map(p => `
+            <li>
+              <img src="${p.imagen || 'https://cdn-icons-png.flaticon.com/512/415/415733.png'}" alt="img" style="width:40px;height:40px;border-radius:8px;margin-right:1rem;object-fit:cover;box-shadow:0 1px 4px #bcaea7;">
+              <span style="flex:1"><b>${p.nombre}</b> <span style="color:#795548;">$${p.precio}</span> <span style="color:#888;">${p.categoria || ''}</span> <span class="estado ${p.activo ? '' : 'inactivo'}">${p.activo ? 'Activo' : 'Inactivo'}</span></span>
+              <button onclick="editarProducto(${encodeURIComponent(JSON.stringify(p))})">Editar</button>
+              <button onclick="cambiarEstadoProducto(${p.id},${p.activo ? 0 : 1})">${p.activo ? 'Desactivar' : 'Activar'}</button>
+            </li>
+          `).join('');
+        }
+      } catch (e) {
+        ul.innerHTML = '<li>Error de conexión.</li>';
+      }
+    }
+    async function crearProducto(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('prod-nombre').value;
+      const precio = document.getElementById('prod-precio').value;
+      const categoria = document.getElementById('prod-categoria').value;
+      const imagen = document.getElementById('prod-imagen').value;
+      try {
+        const res = await fetch('http://localhost:3001/api/productos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.token
+          },
+          body: JSON.stringify({ nombre, precio, categoria, imagen })
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+        } else {
+          document.getElementById('form-producto').reset();
+          cargarProductos();
+        }
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+      return false;
+    }
+    function editarProducto(p) {
+      if (typeof p === 'string') p = JSON.parse(decodeURIComponent(p));
+      document.getElementById('editar-producto-modal').style.display = 'flex';
+      document.getElementById('edit-prod-id').value = p.id;
+      document.getElementById('edit-prod-nombre').value = p.nombre;
+      document.getElementById('edit-prod-precio').value = p.precio;
+      document.getElementById('edit-prod-categoria').value = p.categoria;
+      document.getElementById('edit-prod-imagen').value = p.imagen;
+      document.getElementById('edit-prod-activo').checked = !!p.activo;
+    }
+    function cerrarModalEdicion() {
+      document.getElementById('editar-producto-modal').style.display = 'none';
+    }
+    async function guardarEdicionProducto(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-prod-id').value;
+      const nombre = document.getElementById('edit-prod-nombre').value;
+      const precio = document.getElementById('edit-prod-precio').value;
+      const categoria = document.getElementById('edit-prod-categoria').value;
+      const imagen = document.getElementById('edit-prod-imagen').value;
+      const activo = document.getElementById('edit-prod-activo').checked ? 1 : 0;
+      try {
+        const res = await fetch(`http://localhost:3001/api/productos/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.token
+          },
+          body: JSON.stringify({ nombre, precio, categoria, imagen, activo })
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+        } else {
+          cerrarModalEdicion();
+          cargarProductos();
+        }
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+      return false;
+    }
+    async function cambiarEstadoProducto(id, activo) {
+      try {
+        const res = await fetch(`http://localhost:3001/api/productos/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.token
+          },
+          body: JSON.stringify({ activo })
+        });
+        const data = await res.json();
+        if (data.error) alert(data.error);
+        cargarProductos();
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+    }
+    // --- Venta tipo carrito ---
+    let carrito = [];
+    async function cargarProductosVenta() {
+      carrito = [];
+      const div = document.getElementById('productos-venta');
+      div.innerHTML = 'Cargando productos...';
+      try {
+        const res = await fetch('http://localhost:3001/api/productos', {
+          headers: { 'Authorization': 'Bearer ' + window.token }
+        });
+        const data = await res.json();
+        if (data.error) {
+          div.innerHTML = data.error;
+        } else if (data.productos.length === 0) {
+          div.innerHTML = 'No hay productos disponibles.';
+        } else {
+          div.innerHTML = data.productos.map(p => `
+            <div style='display:flex;align-items:center;margin-bottom:0.7rem;background:#fbeee6;border-radius:10px;padding:0.5rem 1rem;box-shadow:0 1px 3px #bcaea7;'>
+              <img src="${p.imagen || 'https://cdn-icons-png.flaticon.com/512/415/415733.png'}" alt="img" style="width:38px;height:38px;border-radius:8px;object-fit:cover;margin-right:1rem;">
+              <div style="flex:1">
+                <b>${p.nombre}</b><br>
+                <span style="color:#795548;">$${p.precio}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.3rem;">
+                <button type='button' onclick='cambiarCantidadProducto(${p.id}, -1, ${p.precio})' style='width:28px;height:28px;font-size:1.2em;'>-</button>
+                <span id='cant-prod-${p.id}'>0</span>
+                <button type='button' onclick='cambiarCantidadProducto(${p.id}, 1, ${p.precio})' style='width:28px;height:28px;font-size:1.2em;'>+</button>
+              </div>
+            </div>
+          `).join('');
+          document.getElementById('total-venta').textContent = '0.00';
+        }
+      } catch (e) {
+        div.innerHTML = 'Error de conexión.';
+      }
+    }
+    function cambiarCantidadProducto(id, delta, precio) {
+      let item = carrito.find(p => p.producto_id === id);
+      if (!item && delta > 0) {
+        item = { producto_id: id, cantidad: 0, precio_unitario: precio };
+        carrito.push(item);
+      }
+      if (item) {
+        item.cantidad = Math.max(0, (item.cantidad || 0) + delta);
+        if (item.cantidad === 0) {
+          carrito = carrito.filter(p => p.producto_id !== id);
+        }
+        document.getElementById('cant-prod-' + id).textContent = item.cantidad || 0;
+      }
+      actualizarTotalVenta();
+    }
+    function actualizarTotalVenta() {
+      const total = carrito.reduce((sum, p) => sum + p.cantidad * p.precio_unitario, 0);
+      document.getElementById('total-venta').textContent = total.toFixed(2);
+    }
+    async function registrarVentaCarrito() {
+      if (!carrito.length) {
+        alert('Selecciona al menos un producto.');
+        return;
+      }
+      const total = carrito.reduce((sum, p) => sum + p.cantidad * p.precio_unitario, 0);
+      try {
+        const res = await fetch('http://localhost:3001/api/ventas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.token
+          },
+          body: JSON.stringify({ productos: carrito, total })
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert('Venta registrada');
+          cargarProductosVenta();
+        }
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+    }
+  </script>
+</body>
+</html> 

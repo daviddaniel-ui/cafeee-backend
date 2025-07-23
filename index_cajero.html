@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cafetería - Cajero</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f3ef; margin: 0; }
+    .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bcaea7; padding: 2rem; }
+    h2 { text-align: center; color: #795548; }
+    input, button { padding: 0.7rem; margin: 0.5rem 0; border-radius: 6px; border: 1px solid #bcaea7; }
+    button { background: #795548; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #a1887f; }
+    .error { color: #b71c1c; text-align: center; }
+    .ventas { margin-top: 2rem; }
+    .venta { background: #f3e9e2; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .venta-header { display: flex; justify-content: space-between; align-items: center; }
+    .venta-productos { margin-top: 0.5rem; }
+    .venta-productos ul { margin: 0; padding-left: 1.2rem; }
+    .venta-productos li { margin-bottom: 0.3rem; }
+    .detalle { font-size: 0.95em; color: #795548; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Cafetería - Cajero</h2>
+    <div id="login-cajero">
+      <input type="text" id="usuario" placeholder="Usuario cajero" autocomplete="username">
+      <input type="password" id="contrasena" placeholder="Contraseña" autocomplete="current-password">
+      <button onclick="login()">Iniciar Sesión</button>
+      <div id="error" class="error"></div>
+    </div>
+    <div id="app" style="display:none">
+      <h3>Bienvenido, <span id="nombre-usuario"></span></h3>
+      <button onclick="logout()">Cerrar sesión</button>
+      <div class="ventas">
+        <h4>Pedidos de Clientes</h4>
+        <div id="lista-ventas"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    let token = null;
+    let usuario = null;
+    function logout() {
+      token = null;
+      usuario = null;
+      document.getElementById('login-cajero').style.display = '';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('usuario').value = '';
+      document.getElementById('contrasena').value = '';
+      document.getElementById('error').textContent = '';
+    }
+    async function login() {
+      const user = document.getElementById('usuario').value;
+      const pass = document.getElementById('contrasena').value;
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = '';
+      try {
+        const res = await fetch('http://localhost:3001/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario: user, contrasena: pass })
+        });
+        const data = await res.json();
+        if (data.error) {
+          errorDiv.textContent = data.error;
+        } else if (data.rol !== 'cajero') {
+          errorDiv.textContent = 'Solo cajeros pueden acceder aquí.';
+        } else {
+          token = data.token;
+          usuario = data.usuario;
+          document.getElementById('login-cajero').style.display = 'none';
+          document.getElementById('app').style.display = '';
+          document.getElementById('nombre-usuario').textContent = usuario;
+          cargarVentas();
+        }
+      } catch (e) {
+        errorDiv.textContent = 'Error de conexión con el servidor.';
+      }
+    }
+    async function cargarVentas() {
+      const cont = document.getElementById('lista-ventas');
+      cont.innerHTML = 'Cargando...';
+      try {
+        const res = await fetch('http://localhost:3001/api/ventas', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.error) {
+          cont.innerHTML = data.error;
+        } else if (!data.ventas.length) {
+          cont.innerHTML = 'No hay pedidos registrados.';
+        } else {
+          cont.innerHTML = data.ventas.map(v => `
+            <div class="venta">
+              <div class="venta-header">
+                <span><b>Pedido #${v.id}</b> de <b>${v.usuario}</b></span>
+                <span class="detalle">${new Date(v.fecha).toLocaleString()}</span>
+                <span class="detalle">Total: $${v.total}</span>
+                <button onclick="verDetalle(${v.id})">Ver Detalle</button>
+              </div>
+              <div id="detalle-${v.id}" style="display:none;"></div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        cont.innerHTML = 'Error de conexión.';
+      }
+    }
+    async function verDetalle(id) {
+      const div = document.getElementById('detalle-' + id);
+      if (div.style.display === 'none') {
+        div.innerHTML = 'Cargando...';
+        div.style.display = '';
+        try {
+          const res = await fetch(`http://localhost:3001/api/ventas/${id}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const data = await res.json();
+          if (data.error) {
+            div.innerHTML = data.error;
+          } else {
+            div.innerHTML = `
+              <div class="venta-productos">
+                <ul>
+                  ${data.venta.productos.map(p => `<li>${p.nombre} x${p.cantidad} ($${p.precio_unitario})</li>`).join('')}
+                </ul>
+              </div>
+            `;
+          }
+        } catch (e) {
+          div.innerHTML = 'Error de conexión.';
+        }
+      } else {
+        div.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html> 

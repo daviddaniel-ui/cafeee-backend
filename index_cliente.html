@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cafetería - Cliente</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f3ef; margin: 0; }
+    .container { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bcaea7; padding: 2rem; }
+    h2 { text-align: center; color: #795548; }
+    input, button { width: 100%; padding: 0.7rem; margin: 0.5rem 0; border-radius: 6px; border: 1px solid #bcaea7; }
+    button { background: #795548; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #a1887f; }
+    .error { color: #b71c1c; text-align: center; }
+    .productos { margin-top: 2rem; }
+    .producto { display: flex; align-items: center; margin-bottom: 1rem; background: #f3e9e2; border-radius: 8px; padding: 0.5rem; }
+    .producto img { width: 40px; height: 40px; border-radius: 8px; margin-right: 1rem; object-fit: cover; }
+    .producto span { flex: 1; }
+    .carrito { margin-top: 2rem; }
+    .carrito-lista { list-style: none; padding: 0; }
+    .carrito-lista li { margin-bottom: 0.5rem; }
+    .total { font-weight: bold; text-align: right; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Cafetería - Cliente</h2>
+    <div id="registro-login">
+      <input type="text" id="usuario" placeholder="Usuario" autocomplete="username">
+      <input type="password" id="contrasena" placeholder="Contraseña" autocomplete="current-password">
+      <button onclick="login()">Iniciar Sesión</button>
+      <button onclick="registro()">Registrarse</button>
+      <div id="error" class="error"></div>
+    </div>
+    <div id="app" style="display:none">
+      <h3>Bienvenido, <span id="nombre-usuario"></span></h3>
+      <button onclick="logout()">Cerrar sesión</button>
+      <div class="productos">
+        <h4>Productos</h4>
+        <div id="lista-productos"></div>
+      </div>
+      <div class="carrito">
+        <h4>Carrito</h4>
+        <ul class="carrito-lista" id="carrito-lista"></ul>
+        <div class="total">Total: $<span id="total"></span></div>
+        <button onclick="realizarPedido()">Realizar Pedido</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    let token = null;
+    let usuario = null;
+    let carrito = [];
+    async function login() {
+      const user = document.getElementById('usuario').value;
+      const pass = document.getElementById('contrasena').value;
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = '';
+      try {
+        const res = await fetch('http://localhost:3001/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario: user, contrasena: pass })
+        });
+        const data = await res.json();
+        if (data.error) {
+          errorDiv.textContent = data.error;
+        } else if (data.rol !== 'cliente') {
+          errorDiv.textContent = 'Solo clientes pueden acceder aquí.';
+        } else {
+          token = data.token;
+          usuario = data.usuario;
+          document.getElementById('registro-login').style.display = 'none';
+          document.getElementById('app').style.display = '';
+          document.getElementById('nombre-usuario').textContent = usuario;
+          cargarProductos();
+          renderCarrito();
+        }
+      } catch (e) {
+        errorDiv.textContent = 'Error de conexión con el servidor.';
+      }
+    }
+    async function registro() {
+      const user = document.getElementById('usuario').value;
+      const pass = document.getElementById('contrasena').value;
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = '';
+      try {
+        const res = await fetch('http://localhost:3001/api/registro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario: user, contrasena: pass })
+        });
+        const data = await res.json();
+        if (data.error) {
+          errorDiv.textContent = data.error;
+        } else {
+          errorDiv.textContent = 'Registro exitoso. Ahora puedes iniciar sesión.';
+        }
+      } catch (e) {
+        errorDiv.textContent = 'Error de conexión con el servidor.';
+      }
+    }
+    function logout() {
+      token = null;
+      usuario = null;
+      carrito = [];
+      document.getElementById('registro-login').style.display = '';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('usuario').value = '';
+      document.getElementById('contrasena').value = '';
+      document.getElementById('error').textContent = '';
+    }
+    async function cargarProductos() {
+      const cont = document.getElementById('lista-productos');
+      cont.innerHTML = 'Cargando...';
+      try {
+        const res = await fetch('http://localhost:3001/api/productos', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.error) {
+          cont.innerHTML = data.error;
+        } else {
+          cont.innerHTML = data.productos.map(p => `
+            <div class="producto">
+              <img src="${p.imagen || 'https://cdn-icons-png.flaticon.com/512/415/415733.png'}" alt="img">
+              <span><b>${p.nombre}</b> <span style="color:#795548;">$${p.precio}</span> <span style="color:#888;">${p.categoria || ''}</span></span>
+              <button onclick="agregarCarrito(${p.id}, '${p.nombre}', ${p.precio})">Agregar</button>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        cont.innerHTML = 'Error de conexión.';
+      }
+    }
+    function agregarCarrito(id, nombre, precio) {
+      let item = carrito.find(p => p.id === id);
+      if (item) {
+        item.cantidad++;
+      } else {
+        carrito.push({ id, nombre, precio, cantidad: 1 });
+      }
+      renderCarrito();
+    }
+    function quitarCarrito(id) {
+      carrito = carrito.filter(p => p.id !== id);
+      renderCarrito();
+    }
+    function renderCarrito() {
+      const ul = document.getElementById('carrito-lista');
+      ul.innerHTML = carrito.length === 0 ? '<li>Carrito vacío</li>' : carrito.map(p => `
+        <li>${p.nombre} x${p.cantidad} ($${(p.precio * p.cantidad).toFixed(2)}) <button onclick="quitarCarrito(${p.id})">Quitar</button></li>
+      `).join('');
+      document.getElementById('total').textContent = carrito.reduce((sum, p) => sum + p.precio * p.cantidad, 0).toFixed(2);
+    }
+    async function realizarPedido() {
+      if (!carrito.length) {
+        alert('El carrito está vacío.');
+        return;
+      }
+      try {
+        const productos = carrito.map(p => ({ producto_id: p.id, cantidad: p.cantidad, precio_unitario: p.precio }));
+        const total = carrito.reduce((sum, p) => sum + p.precio * p.cantidad, 0);
+        const res = await fetch('http://localhost:3001/api/ventas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ productos, total })
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert('¡Pedido realizado con éxito!');
+          carrito = [];
+          renderCarrito();
+        }
+      } catch (e) {
+        alert('Error de conexión.');
+      }
+    }
+  </script>
+</body>
+</html> 
